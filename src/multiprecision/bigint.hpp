@@ -1,8 +1,9 @@
 #pragma once
+#include <boost/multiprecision/cpp_int.hpp>
 #include <complex>
 #include <vector>
+
 #include "multiprec.hpp"
-#include <boost/multiprecision/cpp_int.hpp>
 
 namespace mp = boost::multiprecision;
 using std::vector;
@@ -17,7 +18,7 @@ public:
     Fourier(vector<cmplx> _limbs);
     Fourier(int sz);
     void operator*=(const Fourier& b);
-    Fourier operator*(const Fourier& b) const ;
+    Fourier operator*(const Fourier& b) const;
     BigInt IFFT();
     void print();
 };
@@ -30,10 +31,10 @@ public:
     BigInt();
     BigInt(size_t sz);
     BigInt(unsigned long long a);
-    BigInt operator* (const BigInt& b) const;
-    void operator+= (const BigInt& b);
-    void operator-= (const BigInt& b);
-    BigInt operator+ (const BigInt& b) const;
+    BigInt operator*(const BigInt& b) const;
+    void operator+=(const BigInt& b);
+    void operator-=(const BigInt& b);
+    BigInt operator+(const BigInt& b) const;
     BigInt operator-(const BigInt& b) const;
     bool operator>(const BigInt& b) const;
     bool operator<(const BigInt& b) const;
