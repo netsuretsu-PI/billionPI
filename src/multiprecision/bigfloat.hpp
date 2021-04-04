@@ -3,10 +3,10 @@
 
 #define POSITIVE false
 #define NEGATIVE true
-    
-class BigFloat{
+
+class BigFloat {
 public:
-    bool sign = POSITIVE; //true is positive
+    bool sign = POSITIVE;  // true is positive
     long long int exponent = 0;
     BigInt fraction;
 
