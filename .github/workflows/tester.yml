@@ -1,4 +1,4 @@
-name: Super-Linter
+name: Check million digit
 
 # 新しいコミットがリポジトリにプッシュされるたびにこのワークフローを実行する
 on: push
@@ -16,6 +16,6 @@ jobs:
       # ubuntu-latest マシンでリポジトリのコピーをチェックアウトする
       - name: Checkout code
         uses: actions/checkout@v2
-
+      - run: apt install g++-8 libboost-dev
       - run: make pi
       - run: ./pi 10000 1 > out.txt
