@@ -1,5 +1,5 @@
 #pragma once
-#include <../longVector.hpp>
+#include "../longVector.hpp"
 #include <string>
 #include <atomic>
 #include <map>
@@ -7,6 +7,10 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <memory>
+#include <utility>
+#include <unistd.h>
+using std::shared_ptr;
 using std::string;
 using std::atomic;
 using std::set;
@@ -14,24 +18,28 @@ using std::map;
 using std::priority_queue;
 using std::vector;
 using std::greater;
+using std::pair;
 
 using TimeStamp = time_t;
 
 // NOT THREAD SAFE
 template <class T>
-class FileBasedVector : public LongVector<T> {
-    static const ull PAGE_SIZE = 1; //num of elements
+class FileBasedVector : public virtual LongVector<T> {
+    static const ull PAGE_SIZE = 1024; //num of elements
     static const ull CACHE_SIZE = 2; //num of pages
     static const ull BYTE_OF_PAGE = PAGE_SIZE * sizeof(T);
 
 struct PageInfo {
-    void* address;
-    TimeStamp lastUsedTime;
+    T* address;
+    TimeStamp lastUsedTime = -1;
     ull pageIdx;
-    T& get(ull idx)const{
-        return *(T*)(address + (idx - getStartIndex()) * sizeof(T));
+    PageInfo(T* address, ull pageIdx){
+        this->address = address;
+        this->pageIdx = pageIdx;
     }
-    ull getStartIndex()const{return pageIdx * PAGE_SIZE;}
+    T& get(ull idx)const{
+        return address[idx - pageIdx * PAGE_SIZE];
+    }
     bool operator>(const PageInfo& b) const {
         return lastUsedTime > b.lastUsedTime;
     }
@@ -39,15 +47,16 @@ struct PageInfo {
         return lastUsedTime < b.lastUsedTime;
     }
 };
+    using PageInfoPtr = shared_ptr<PageInfo>;
 
-    static atomic<int> globalVectorCounter = 0;
+    static atomic<int> globalVectorCounter;
     
     string fileName;
     int fd = -1;
     ull reservedPage = 0;
 
-    map<ull, PageInfo> cachedPages;
-    set<PageInfo> lastUsedPagePQ;
+    map<ull, PageInfoPtr> cachedPages;
+    set<pair<TimeStamp, PageInfoPtr>> lastUsedPagePQ;
 public:
     FileBasedVector(vector<T> v);
     FileBasedVector(ull size);
@@ -59,13 +68,22 @@ public:
     ~FileBasedVector(); //release resources (delete files)
 
 private:
-    PageInfo cache(ull pageIdx);
+    PageInfoPtr cache(ull pageIdx);
     void removeOldestCache();
-    void removeCache(PageInfo page);
-    void resizeInPage(ull num);
+    void removeCache(PageInfoPtr page);
+    void reserveInPage(ull num);
     void* getPageAddress(ull pageIdx);
+    void touchPage(PageInfoPtr page);
 
     ull getSizeInByte();
     ull getSizeInPage();
     ull getReservedPage();
+
+    TimeStamp getTime();
 };
+
+template class FileBasedVector<int>;
+template class FileBasedVector<unsigned int>;
+template class FileBasedVector<long long int>;
+template class FileBasedVector<unsigned long long int>;
+template class FileBasedVector<double>;
