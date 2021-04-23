@@ -72,7 +72,7 @@ BigFloat BigFloat::reciprocal(unsigned long long int digit) {
     return r;
 }
 
-BigFloat BigFloat::operator*(const BigFloat& b) {
+BigFloat BigFloat::operator*( BigFloat& b) {
     BigFloat ret(b.fraction * this->fraction, b.exponent + this->exponent,
                  sign ^ b.sign);
     ret.shrink();
@@ -159,7 +159,8 @@ BigFloat getInitialI(BigFloat& b) {
     BigFloat ret(1.0 / sqrt(v));
     ret.exponent += -(b.exponent + st + 1) / 2;
     if ((b.exponent + st) % 2) {
-        ret = ret * BigFloat(BASE_SQRT);
+        BigFloat sq(BASE_SQRT);
+        ret = ret * sq;
     }
     ret.sign = b.sign;
     return ret;
