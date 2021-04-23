@@ -3,7 +3,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <cassert>
 #include <complex>
-#include <vector>
 
 namespace mp = boost::multiprecision;
 
@@ -13,7 +12,7 @@ Fourier::Fourier(vector<cmplx> _limbs) : limbs(_limbs) {}
 Fourier::Fourier(int sz) : limbs(sz) {}
 BigInt Fourier::IFFT() {
     BigInt ret(limbs.size());
-    vector<cmplx> buf = limbs;
+    FileBasedVector<cmplx> buf = limbs.copy();
     ifft(buf);
     for (int i = 0; limbs.size() > i; i++) {
         ret.limbs[i] = round(buf[i].real());
@@ -50,7 +49,7 @@ BigInt::BigInt(unsigned long long a) {
 BigInt BigInt::operator*(BigInt& b) {
     size_t n = max(limbs.size(), b.limbs.size());
     BigInt c(size_t(1 << (getFSize(n) + 1)));
-    convolve<vector<ull>, vector<cmplx>>(limbs, b.limbs, c.limbs);
+    convolve(limbs, b.limbs, c.limbs);
     c.normalize();
 #ifdef DEBUG
     if (c.toCppInt() != b.toCppInt() * toCppInt()) {
@@ -61,7 +60,7 @@ BigInt BigInt::operator*(BigInt& b) {
     return c;
 }
 Fourier BigInt::FFT(size_t hn) {
-    Fourier f(1 << (getFSize(max(hn, limbs.size())) + 1));
+    Fourier f(1 << (getFSize(max((ull)hn, limbs.size())) + 1));
     for (int i = 0; limbs.size() > i; i++) f.limbs[i] = limbs[i];
     fft(f.limbs);
     return f;
@@ -171,7 +170,7 @@ void BigInt::operator-=( BigInt& b) {
 
 BigInt BigInt::operator+( BigInt& b)  {
     BigInt ret((size_t)0);
-    ret.limbs = limbs;
+    ret.limbs = limbs.copy();
     ret += b;
     return ret;
 }
@@ -198,7 +197,7 @@ bool BigInt::operator<( BigInt& b)  {
 
 BigInt BigInt::operator-( BigInt& b)  {
     BigInt ret((size_t)0);
-    ret.limbs = limbs;
+    ret.limbs = limbs.copy();
     ret -= b;
     return ret;
 }

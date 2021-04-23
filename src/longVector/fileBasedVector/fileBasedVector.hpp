@@ -23,6 +23,8 @@ using std::pair;
 
 using TimeStamp = time_t;
 
+extern atomic<int> globalVectorCounter;
+
 // NOT THREAD SAFE
 template <class T>
 class FileBasedVector : public virtual LongVector<T> {
@@ -49,8 +51,6 @@ struct PageInfo {
     }
 };
     using PageInfoPtr = shared_ptr<PageInfo>;
-
-    static atomic<int> globalVectorCounter;
     
     string fileName;
     int fd = -1;
@@ -59,14 +59,20 @@ struct PageInfo {
     map<ull, PageInfoPtr> cachedPages;
     set<pair<TimeStamp, PageInfoPtr>> lastUsedPagePQ;
 public:
-    FileBasedVector(vector<T> v);
+    FileBasedVector(vector<T>& v);
     FileBasedVector(ull size);
+    FileBasedVector();
+
+    FileBasedVector<T>&& copy();
 
     ull push_back(const T& v);
     ull pop_back();
     T& operator[](ull idx);
     void resize(ull _size);
     ~FileBasedVector(); //release resources (delete files)
+
+    FileBasedVector(FileBasedVector<T>&& src);
+    FileBasedVector& operator=(FileBasedVector&& r);
 
 private:
     PageInfoPtr cache(ull pageIdx);
@@ -75,12 +81,15 @@ private:
     void reserveInPage(ull num);
     void* getPageAddress(ull pageIdx);
     void touchPage(PageInfoPtr page);
+    void freeResources();
 
     ull getSizeInByte();
     ull getSizeInPage();
     ull getReservedPage();
 
     TimeStamp getTime();
+
+    void operator=(const FileBasedVector<T>& src) {} //コピー禁止
 };
 
 template class FileBasedVector<int>;

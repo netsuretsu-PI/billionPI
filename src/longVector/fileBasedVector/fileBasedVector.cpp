@@ -14,10 +14,14 @@
 using std::move;
 using std::make_pair;
 
-
+atomic<int> globalVectorCounter(0);
 template <class T>
-atomic<int> FileBasedVector<T>::globalVectorCounter(0);
-
+FileBasedVector<T>::FileBasedVector(vector<T>& v):FileBasedVector(v.size()){
+    for(int i = 0; v.size() > i; i++)
+        operator[](i) = v[i];
+}
+template <class T>
+FileBasedVector<T>::FileBasedVector():FileBasedVector(0){}
 template <class T>
 FileBasedVector<T>::FileBasedVector(ull _size){
     if(BYTE_OF_PAGE % sysconf(_SC_PAGE_SIZE) != 0){
@@ -128,11 +132,45 @@ void FileBasedVector<T>::resize(ull _size){
 }
 
 template <class T>
-FileBasedVector<T>::~FileBasedVector(){
+void FileBasedVector<T>::freeResources(){
     auto cp = cachedPages;
     for(auto page : cp) 
         removeCache(page.second);
     
     close(fd);
     unlink(fileName.c_str());
+}
+
+template <class T>
+FileBasedVector<T>::~FileBasedVector(){
+    freeResources();
+}
+
+template <class T>
+FileBasedVector<T>::FileBasedVector(FileBasedVector<T>&& src){
+    fileName = src.fileName;
+    fd = src.fd;
+    reservedPage = src.reservedPage;
+    cachedPages = std::move(src.cachedPages);
+    lastUsedPagePQ = std::move(src.lastUsedPagePQ);
+}
+
+template <class T>
+FileBasedVector<T>&& FileBasedVector<T>::copy(){
+    FileBasedVector<T> ret(this->_size);
+    for(int i = 0; this->_size > i; i++){
+        ret[i] = operator[](i);
+    }
+    return std::move(ret);
+}
+
+template <class T>
+FileBasedVector<T>& FileBasedVector<T>::operator=(FileBasedVector<T>&& r){
+    freeResources();
+
+    fileName = r.fileName;
+    fd = r.fd;
+    reservedPage = r.reservedPage;
+    cachedPages = r.cachedPages;
+    lastUsedPagePQ = r.lastUsedPagePQ;
 }

@@ -68,12 +68,12 @@ void fft(VEC& A) {
 
 template<class VEC>
 void ifft(VEC& ar) {
-    for (auto& a : ar) {
-        a = conj(a);
+    for (int i = 0; ar.size() > i; i++) {
+        ar[i] = conj(ar[i]);
     }
     fft(ar);
-    for (auto& a : ar) {
-        a = conj(a) / cmplx(ar.size());
+    for (int i = 0; ar.size() > i; i++) {
+        ar[i] = conj(ar[i]) / cmplx(ar.size());
     }
 }
 
@@ -117,3 +117,4 @@ template void convolve<vector<ull>,vector<cmplx>>(vector<ull>&,
                                            vector<ull>&,
                                            vector<ull>&);
 template void ifft<vector<cmplx>>(vector<cmplx>&);
+template void ifft<FileBasedVector<cmplx>>(FileBasedVector<cmplx>&);

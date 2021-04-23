@@ -13,6 +13,7 @@ public:
     BigFloat(double a);
     BigFloat(BigInt a, long long int _exponent = 0, bool _sign = POSITIVE);
     BigFloat operator*( BigFloat& b);
+    BigFloat operator*( BigFloat&& b);
     BigFloat operator+(BigFloat& b);
     BigFloat operator-=(int b);
     BigFloat operator-(BigFloat& b);
