@@ -14,6 +14,9 @@ endif
 $(OBJDIR)/fileBasedVector.o: ${LONGVECTORDIR}/longVector.hpp ${LONGVECTORDIR}/fileBasedVector/fileBasedVector.hpp ${LONGVECTORDIR}/fileBasedVector/fileBasedVector.cpp 
 	$(CXX) $(LONGVECTORDIR)/fileBasedVector/fileBasedVector.cpp -c $(CFLAGS) -o $(OBJDIR)/fileBasedVector.o
 
+$(OBJDIR)/wrappedVector.o: ${LONGVECTORDIR}/longVector.hpp ${LONGVECTORDIR}/wrappedVector/wrappedVector.hpp ${LONGVECTORDIR}/wrappedVector/wrappedVector.cpp 
+	$(CXX) $(LONGVECTORDIR)/wrappedVector/wrappedVector.cpp -c $(CFLAGS) -o $(OBJDIR)/wrappedVector.o
+
 $(OBJDIR)/multiprec.o: ${MULTIPRECDIR}/multiprec.hpp ${MULTIPRECDIR}/multiprec.cpp 
 	$(CXX) $(MULTIPRECDIR)/multiprec.cpp -c $(CFLAGS) -o $(OBJDIR)/multiprec.o
 
@@ -30,8 +33,8 @@ $(OBJDIR)/test.o: $(SRCDIR)/test.cpp
 pi: $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o
 	$(CXX) $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o -o pi $(CFLAGS) -pthread
 
-test: $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o
-	$(CXX) $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o -o test $(CFLAGS) -pthread
+test: $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o
+	$(CXX) $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o -o test $(CFLAGS) -pthread
 
 clean:
 	rm -f obj/* pi test out.txt

@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 #include <unistd.h>
+#include <complex>
 using std::shared_ptr;
 using std::string;
 using std::atomic;
@@ -87,3 +88,4 @@ template class FileBasedVector<unsigned int>;
 template class FileBasedVector<long long int>;
 template class FileBasedVector<unsigned long long int>;
 template class FileBasedVector<double>;
+template class FileBasedVector<std::complex<double>>;
