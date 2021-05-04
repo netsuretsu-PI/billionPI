@@ -22,10 +22,9 @@ public:
     void negate();
     void print();
     double toDouble();
-    void dumpTo(std::ostream& ost);
     BigFloat reciprocal(unsigned long long int digit);
     void shrink();
 };
-
+void dumpBigFloat(BigFloat x, std::ostream& ost, unsigned long long int prec);
 BigFloat invsqrt(BigFloat& b, unsigned long long digit);
 double testDiv(BigFloat& a, BigFloat& b);

@@ -132,7 +132,31 @@ void BigFloat::print() {
     cout << "topexponen : " << exponent + fraction.limbs.size() + 1 << endl;
     // fraction.print();
 }
-void BigFloat::dumpTo(ostream& ost) {}
+
+unsigned long long int floor(BigFloat& x) {
+    assert(x.exponent + (int)x.fraction.limbs.size() <= 1);
+    if ((x.exponent) + (int)x.fraction.limbs.size() == 1) {
+        return x.fraction.limbs.back();
+    } else {
+        return 0ULL;
+    }
+}
+
+void dumpBigFloat(BigFloat x, ostream& ost, unsigned long long int prec) {
+    BigFloat ten(10.0);
+    ost << floor(x) << ".";
+    if (floor(x) != 0) {
+        x.fraction.limbs.pop_back();
+    }
+    for (unsigned long long int i = 0; i < prec; i++) {
+        x = x * ten;
+        ost << floor(x);
+        if (floor(x) != 0) {
+            x.fraction.limbs.pop_back();
+        }
+    }
+    ost << endl;
+}
 
 double BigFloat::toDouble() {
     double ret = 0;

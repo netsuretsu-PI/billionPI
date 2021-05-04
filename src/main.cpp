@@ -47,7 +47,10 @@ inline void calcZ(long long k, BigInt& Z) {
 
 inline void mul(const M& lm, const M& rm, M& m, const int tnum, bool neg) {
     m.X = lm.X * rm.X;
-    m.Y = lm.Y * rm.X + lm.Z * rm.Y;
+    if (neg)
+        m.Y = lm.Y * rm.X - lm.Z * rm.Y;
+    else
+        m.Y = lm.Y * rm.X + lm.Z * rm.Y;
     m.Z = lm.Z * rm.Z;
 }
 
@@ -116,9 +119,9 @@ int main(int argc, char* argv[]) {
                    BigFloat(m.Y).reciprocal(keta);
     cerr << "calcP:" << get_elapsed_time() / 1000 << "sec" << endl;
     ans.shrink();
-    ans.print();
-    cout << ans.toDouble() << endl;
     // ans.print();
-
+    // cout << ans.toDouble() << endl;
+    // ans.print();
+    dumpBigFloat(ans, cout, N);
     return 0;
 }
