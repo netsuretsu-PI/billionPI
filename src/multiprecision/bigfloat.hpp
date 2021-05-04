@@ -1,4 +1,6 @@
 #pragma once
+#include <ostream>
+
 #include "bigint.hpp"
 
 #define POSITIVE false
@@ -20,6 +22,7 @@ public:
     void negate();
     void print();
     double toDouble();
+    void dumpTo(std::ostream& ost);
     BigFloat reciprocal(unsigned long long int digit);
     void shrink();
 };

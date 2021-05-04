@@ -132,6 +132,7 @@ void BigFloat::print() {
     cout << "topexponen : " << exponent + fraction.limbs.size() + 1 << endl;
     // fraction.print();
 }
+void BigFloat::dumpTo(ostream& ost) {}
 
 double BigFloat::toDouble() {
     double ret = 0;
