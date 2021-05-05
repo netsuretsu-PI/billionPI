@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include "./multiprecision/multiprec.hpp"
+#include "./multiprecision/bigint.hpp"
 using std::cout;
 using std::endl;
 
@@ -25,9 +26,16 @@ void fftTest(){
     convolve(a, b, c);
     assert(c[0] == 2 && c[1] == 6 && c[2] == 14 && c[3] == 14 && c[4] == 12);
 }
+void bigIntTest() {
+    BigInt a(10000ULL), b(12312ULL);
+    cout << (a + b).toCppInt() << endl;
+    cout << (a * b).toCppInt() << endl;
+    cout << (a * b * a * b * a * b * a * b * a * b * a * b * a).toCppInt() << endl;
+}
 void fileBasedVectorTest(){
     // simpleWriteTest();
     fftTest();
+    bigIntTest();
 }
 
 int main(){

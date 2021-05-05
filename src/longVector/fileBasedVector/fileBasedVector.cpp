@@ -148,20 +148,20 @@ FileBasedVector<T>::~FileBasedVector(){
 
 template <class T>
 FileBasedVector<T>::FileBasedVector(FileBasedVector<T>&& src){
-    fileName = src.fileName;
-    fd = src.fd;
-    reservedPage = src.reservedPage;
+    fileName = std::move(src.fileName);
+    fd = std::move(src.fd);
+    reservedPage = std::move(src.reservedPage);
     cachedPages = std::move(src.cachedPages);
     lastUsedPagePQ = std::move(src.lastUsedPagePQ);
 }
 
 template <class T>
-FileBasedVector<T>&& FileBasedVector<T>::copy(){
-    FileBasedVector<T> ret(this->_size);
+void FileBasedVector<T>::operator=(FileBasedVector<T>& src){
+    resize(src._size);
+
     for(int i = 0; this->_size > i; i++){
-        ret[i] = operator[](i);
+        this->operator[](i) = src[i];
     }
-    return std::move(ret);
 }
 
 template <class T>
@@ -173,4 +173,5 @@ FileBasedVector<T>& FileBasedVector<T>::operator=(FileBasedVector<T>&& r){
     reservedPage = r.reservedPage;
     cachedPages = r.cachedPages;
     lastUsedPagePQ = r.lastUsedPagePQ;
+    return *this;
 }

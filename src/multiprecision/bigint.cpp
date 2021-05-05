@@ -12,7 +12,8 @@ Fourier::Fourier(vector<cmplx> _limbs) : limbs(_limbs) {}
 Fourier::Fourier(int sz) : limbs(sz) {}
 BigInt Fourier::IFFT() {
     BigInt ret(limbs.size());
-    FileBasedVector<cmplx> buf = limbs.copy();
+    FileBasedVector<cmplx> buf;
+    buf = limbs;
     ifft(buf);
     for (int i = 0; limbs.size() > i; i++) {
         ret.limbs[i] = round(buf[i].real());
@@ -170,7 +171,7 @@ void BigInt::operator-=( BigInt& b) {
 
 BigInt BigInt::operator+( BigInt& b)  {
     BigInt ret((size_t)0);
-    ret.limbs = limbs.copy();
+    ret.limbs = limbs;
     ret += b;
     return ret;
 }
@@ -197,7 +198,7 @@ bool BigInt::operator<( BigInt& b)  {
 
 BigInt BigInt::operator-( BigInt& b)  {
     BigInt ret((size_t)0);
-    ret.limbs = limbs.copy();
+    ret.limbs = limbs;
     ret -= b;
     return ret;
 }

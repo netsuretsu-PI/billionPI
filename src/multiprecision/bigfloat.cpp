@@ -7,7 +7,7 @@
 using namespace std;
 
 BigFloat::BigFloat(BigInt a, long long int _exponent, bool _sign) {
-    fraction = a;
+    fraction = move(a);
     exponent = _exponent;
     sign = _sign;
 }
@@ -109,18 +109,31 @@ void BigFloat::changeExponent(long long int nexponent) {
     int diff = exponent - nexponent;
     exponent = nexponent;
     if (diff > 0) {
-        fraction.limbs.insert(fraction.limbs.begin(), diff, 0);
+        ull sz = fraction.limbs.size();
+        fraction.limbs.resize(fraction.limbs.size() + diff);
+        for(int i = sz - 1; diff <= i; i--){
+            fraction.limbs[i + diff] = fraction.limbs[i];
+        }
+        // fraction.limbs.insert(fraction.limbs.begin(), diff, 0);
     } else if (diff < 0) {
         diff = max(0, -diff);
         if (fraction.limbs.size() <= diff) {
-            fraction.limbs = vector<LIMB>(1);
-        } else
-            fraction.limbs =
-                vector<LIMB>(fraction.limbs.begin() + diff,
-                             fraction.limbs.begin() +
-                                 max({(unsigned long long)diff,
+            fraction.limbs = FileBasedVector<LIMB>(1);
+        } else{
+            ull en = max({(unsigned long long)diff,
                                       (unsigned long long)fraction.limbs.size(),
-                                      fraction.MSL() + 1}));
+                                      fraction.MSL() + 1});
+            for(int i = diff; en > i; i++){
+                fraction.limbs[i - diff] = fraction.limbs[i];
+            }
+            fraction.limbs.resize(en - diff);
+            // fraction.limbs =
+            //     vector<LIMB>(fraction.limbs.begin() + diff,
+            //                  fraction.limbs.begin() +
+            //                      max({(unsigned long long)diff,
+            //                           (unsigned long long)fraction.limbs.size(),
+            //                           fraction.MSL() + 1}));
+        }
     }
 }
 
@@ -194,11 +207,16 @@ void BigFloat::shrink() {
     int lsl = fraction.LSL(), msl = fraction.MSL();
     if (lsl > msl) {
         exponent = 0;
-        fraction.limbs = vector<LIMB>(1);
+        fraction.limbs = FileBasedVector<LIMB>(1);
         return;
     }
     if (lsl == 0 && msl == fraction.limbs.size() - 1) return;
     exponent += lsl;
-    fraction.limbs = vector<LIMB>(fraction.limbs.begin() + lsl,
-                                  fraction.limbs.begin() + msl + 1);
+
+    for(int i = lsl; msl + 1 > i; i++) {
+        fraction.limbs[i - lsl] = fraction.limbs[i];
+    }
+    fraction.limbs.resize(msl + 1 - lsl);
+    // fraction.limbs = vector<LIMB>(fraction.limbs.begin() + lsl,
+    //                               fraction.limbs.begin() + msl + 1);
 }

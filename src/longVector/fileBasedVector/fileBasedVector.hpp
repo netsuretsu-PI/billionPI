@@ -63,8 +63,6 @@ public:
     FileBasedVector(ull size);
     FileBasedVector();
 
-    FileBasedVector<T>&& copy();
-
     ull push_back(const T& v);
     ull pop_back();
     T& operator[](ull idx);
@@ -74,6 +72,7 @@ public:
     FileBasedVector(FileBasedVector<T>&& src);
     FileBasedVector& operator=(FileBasedVector&& r);
 
+    void operator=(FileBasedVector<T>& src);
 private:
     PageInfoPtr cache(ull pageIdx);
     void removeOldestCache();
@@ -89,7 +88,6 @@ private:
 
     TimeStamp getTime();
 
-    void operator=(const FileBasedVector<T>& src) {} //コピー禁止
 };
 
 template class FileBasedVector<int>;
