@@ -22,18 +22,18 @@ public:
     BigInt X, Y, Z;
 };
 
-const auto CT24 = BigInt(C * C * C / 24ULL);
-inline void calcX(const long long k, const BigInt& bk, BigInt& X) {
+auto CT24 = BigInt(C * C * C / 24ULL);
+inline void calcX(const long long k, BigInt& bk, BigInt& X) {
     if (k == 0)
-        X = BigInt(1ULL);
+        X = std::move(BigInt(1ULL));
     else {
         X = bk * bk * bk * CT24;
     }
 }
 
-const BigInt AB(A * 1ULL);
-const BigInt BB(B * 1ULL);
-inline void calcY(const BigInt& bk, BigInt& Y) { Y = bk * BB + AB; }
+ BigInt AB(A * 1ULL);
+ BigInt BB(B * 1ULL);
+inline void calcY( BigInt& bk, BigInt& Y) { Y = bk * BB + AB; }
 
 inline void calcZ(long long k, BigInt& Z) {
     if (k == n - 1)
@@ -45,7 +45,7 @@ inline void calcZ(long long k, BigInt& Z) {
     //(6k+1)(6k+2)(6k+3)(6k+4)(6k+5)(6k+6)
 }
 
-inline void mul(const M& lm, const M& rm, M& m, const int tnum, bool neg) {
+inline void mul( M& lm,  M& rm, M& m, const int tnum, bool neg) {
     m.X = lm.X * rm.X;
     m.Y = lm.Y * rm.X + lm.Z * rm.Y;
     m.Z = lm.Z * rm.Z;
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
     cout << "need prec:" << keta << endl;
     of = invsqrt(of, keta);
     BigFloat ans = BigFloat(BigInt(4270934400ULL) * m.X) * of *
-                   BigFloat(m.Y).reciprocal(keta);
+                   BigFloat(std::move(m.Y)).reciprocal(keta);
     cerr << "calcP:" << get_elapsed_time() / 1000 << "sec" << endl;
     ans.shrink();
     ans.print();

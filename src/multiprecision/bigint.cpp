@@ -3,7 +3,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <cassert>
 #include <complex>
-#include <vector>
 
 namespace mp = boost::multiprecision;
 
@@ -13,7 +12,8 @@ Fourier::Fourier(vector<cmplx> _limbs) : limbs(_limbs) {}
 Fourier::Fourier(int sz) : limbs(sz) {}
 BigInt Fourier::IFFT() {
     BigInt ret(limbs.size());
-    vector<cmplx> buf = limbs;
+    FileBasedVector<cmplx> buf;
+    buf = limbs;
     ifft(buf);
     for (int i = 0; limbs.size() > i; i++) {
         ret.limbs[i] = round(buf[i].real());
@@ -22,14 +22,14 @@ BigInt Fourier::IFFT() {
     return ret;
 }
 
-void Fourier::operator*=(const Fourier& b) {
+void Fourier::operator*=( Fourier& b) {
     assert(limbs.size() == b.limbs.size());
     for (int i = 0; limbs.size() > i; i++) {
         limbs[i] *= b.limbs[i];
     }
 }
 
-Fourier Fourier::operator*(const Fourier& b) const {
+Fourier Fourier::operator*( Fourier& b)  {
     Fourier ret(limbs.size());
     assert(limbs.size() == b.limbs.size());
     for (int i = 0; limbs.size() > i; i++) {
@@ -47,7 +47,21 @@ BigInt::BigInt(unsigned long long a) {
         a /= BASE;
     }
 }
-BigInt BigInt::operator*(const BigInt& b) const {
+BigInt BigInt::operator*(BigInt& b) {
+    size_t n = max(limbs.size(), b.limbs.size());
+    BigInt c(size_t(1 << (getFSize(n) + 1)));
+    convolve(limbs, b.limbs, c.limbs);
+    c.normalize();
+// #ifdef DEBUG
+    if (c.toCppInt() != b.toCppInt() * toCppInt()) {
+        cout << c.size() << " " << limbs.size() << " " << b.limbs.size()
+             << endl;
+    }
+// #endif
+    return c;
+}
+
+BigInt BigInt::operator*(BigInt&& b) {
     size_t n = max(limbs.size(), b.limbs.size());
     BigInt c(size_t(1 << (getFSize(n) + 1)));
     convolve(limbs, b.limbs, c.limbs);
@@ -61,7 +75,7 @@ BigInt BigInt::operator*(const BigInt& b) const {
     return c;
 }
 Fourier BigInt::FFT(size_t hn) {
-    Fourier f(1 << (getFSize(max(hn, limbs.size())) + 1));
+    Fourier f(1 << (getFSize(max((ull)hn, limbs.size())) + 1));
     for (int i = 0; limbs.size() > i; i++) f.limbs[i] = limbs[i];
     fft(f.limbs);
     return f;
@@ -83,7 +97,7 @@ unsigned long long BigInt::toULL() {
     }
     return sum;
 }
-double BigInt::toDouble() const {
+double BigInt::toDouble()  {
     double sum = 0;
     for (int i = 0; limbs.size() > i; i++) {
         double cur = pow(BASE, i) * limbs[i];
@@ -121,7 +135,7 @@ void BigInt::normalize() {
 
 size_t BigInt::size() { return limbs.size(); }
 
-void BigInt::operator+=(const BigInt& b) {
+void BigInt::operator+=( BigInt& b) {
     if (limbs.size() < b.limbs.size()) limbs.resize(b.limbs.size());
     long long carry = 0;
     for (int i = 0; b.limbs.size() > i; i++) {
@@ -145,7 +159,7 @@ void BigInt::operator+=(const BigInt& b) {
     }
 }
 
-void BigInt::operator-=(const BigInt& b) {
+void BigInt::operator-=( BigInt& b) {
     if (limbs.size() < b.limbs.size()) limbs.resize(b.limbs.size());
     long long carry = 0;
     for (int i = 0; b.limbs.size() > i; i++) {
@@ -169,14 +183,20 @@ void BigInt::operator-=(const BigInt& b) {
     assert(carry == 0);
 }
 
-BigInt BigInt::operator+(const BigInt& b) const {
+BigInt BigInt::operator+( BigInt& b)  {
+    BigInt ret((size_t)0);
+    ret.limbs = limbs;
+    ret += b;
+    return ret;
+}
+BigInt BigInt::operator+( BigInt&& b)  {
     BigInt ret((size_t)0);
     ret.limbs = limbs;
     ret += b;
     return ret;
 }
 
-bool BigInt::operator>(const BigInt& b) const {
+bool BigInt::operator>( BigInt& b)  {
     for (int i = max(limbs.size(), b.limbs.size()) - 1; 0 <= i; i--) {
         int an = limbs.size() > i ? limbs[i] : 0;
         int bn = b.limbs.size() > i ? b.limbs[i] : 0;
@@ -186,7 +206,7 @@ bool BigInt::operator>(const BigInt& b) const {
     return false;
 }
 
-bool BigInt::operator<(const BigInt& b) const {
+bool BigInt::operator<( BigInt& b)  {
     for (int i = max(limbs.size(), b.limbs.size()) - 1; 0 <= i; i--) {
         int an = limbs.size() > i ? limbs[i] : 0;
         int bn = b.limbs.size() > i ? b.limbs[i] : 0;
@@ -196,7 +216,7 @@ bool BigInt::operator<(const BigInt& b) const {
     return false;
 }
 
-BigInt BigInt::operator-(const BigInt& b) const {
+BigInt BigInt::operator-( BigInt& b)  {
     BigInt ret((size_t)0);
     ret.limbs = limbs;
     ret -= b;
@@ -216,7 +236,7 @@ unsigned long long BigInt::LSL() {
     return limbs.size() - 1;
 }
 
-mp::cpp_int BigInt::toCppInt() const {
+mp::cpp_int BigInt::toCppInt()  {
     mp::cpp_int ret = 0;
     for (int i = limbs.size() - 1; i >= 0; i--) {
         ret *= BASE;

@@ -11,6 +11,12 @@ ifeq ($(BUILD),release)
 	CFLAGS = -O3 -std=c++17
 endif
 
+$(OBJDIR)/fileBasedVector.o: ${LONGVECTORDIR}/longVector.hpp ${LONGVECTORDIR}/fileBasedVector/fileBasedVector.hpp ${LONGVECTORDIR}/fileBasedVector/fileBasedVector.cpp 
+	$(CXX) $(LONGVECTORDIR)/fileBasedVector/fileBasedVector.cpp -c $(CFLAGS) -o $(OBJDIR)/fileBasedVector.o
+
+$(OBJDIR)/wrappedVector.o: ${LONGVECTORDIR}/longVector.hpp ${LONGVECTORDIR}/wrappedVector/wrappedVector.hpp ${LONGVECTORDIR}/wrappedVector/wrappedVector.cpp 
+	$(CXX) $(LONGVECTORDIR)/wrappedVector/wrappedVector.cpp -c $(CFLAGS) -o $(OBJDIR)/wrappedVector.o
+
 $(OBJDIR)/multiprec.o: ${MULTIPRECDIR}/multiprec.hpp ${MULTIPRECDIR}/multiprec.cpp 
 	$(CXX) $(MULTIPRECDIR)/multiprec.cpp -c $(CFLAGS) -o $(OBJDIR)/multiprec.o
 
@@ -21,9 +27,14 @@ $(OBJDIR)/bigfloat.o: $(MULTIPRECDIR)/multiprec.hpp $(MULTIPRECDIR)/bigfloat.cpp
 
 $(OBJDIR)/main.o: $(SRCDIR)/main.cpp
 	$(CXX) $(SRCDIR)/main.cpp -c $(CFLAGS) -o $(OBJDIR)/main.o
+$(OBJDIR)/test.o: $(SRCDIR)/test.cpp
+	$(CXX) $(SRCDIR)/test.cpp -c $(CFLAGS) -o $(OBJDIR)/test.o
 
-pi: $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o
-	$(CXX) $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o -o pi $(CFLAGS) -pthread
+pi: $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o
+	$(CXX) $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o -o pi $(CFLAGS) -pthread
+
+test: $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o
+	$(CXX) $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o -o test $(CFLAGS) -pthread
 
 clean:
-	rm -f obj/* pi out.txt
+	rm -f obj/* pi test out.txt vecData/*

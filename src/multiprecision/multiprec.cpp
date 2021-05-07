@@ -1,6 +1,8 @@
 #include "multiprec.hpp"
 
 #include <algorithm>
+#include <iostream>
+#include <assert.h>
 
 using namespace std::literals::complex_literals;
 const cmplx PI2 = 6.28318530717958647692;
@@ -34,10 +36,11 @@ int getFSize(int n) {
     return l;
 }
 
-void fft(vector<cmplx>& A) {
+template<class VEC>
+void fft(VEC& A) {
     int k = getFSize(A.size());
     int i, j, l, n = 1 << k;
-    vector<cmplx> tbl(n);
+    VEC tbl(n);
     cmplx buf;
     for (int i = 0; n > i; i++) {
         int to = bitreverse(i) >> (32 - k);
@@ -65,24 +68,27 @@ void fft(vector<cmplx>& A) {
     }
 }
 
-void ifft(vector<cmplx>& ar) {
-    for (auto& a : ar) {
-        a = conj(a);
+template<class VEC>
+void ifft(VEC& ar) {
+    for (int i = 0; ar.size() > i; i++) {
+        ar[i] = conj(ar[i]);
     }
     fft(ar);
-    for (auto& a : ar) {
-        a = conj(a) / cmplx(ar.size());
+    for (int i = 0; ar.size() > i; i++) {
+        ar[i] = conj(ar[i]) / cmplx(ar.size());
     }
 }
 
-template <typename T>
-void convolve(const vector<T>& _A, const vector<T>& _B, vector<T>& C) {
-    const T *A = &_A[0], *B = &_B[0];
-    if (_A.size() < _B.size()) swap(A, B);
+template<class VEC, class CMPLXVEC>
+void convolve(VEC& A, VEC& B, VEC& C) {
+    if (A.size() < B.size()) {
+        convolve(B,A,C);
+        return;
+    }
 
-    int n = max(_A.size(), _B.size()), m = min(_A.size(), _B.size());
+    int n = max(A.size(), B.size()), m = min(A.size(), B.size());
     int l = getFSize(n) + 1, k = 1 << l;
-    vector<cmplx> CH(k), CC(k / 2);
+    CMPLXVEC CH(k), CC(k / 2);
 
     for (int i = 0; m > i; i++) CH[i] = cmplx(A[i]) + cmplx(B[i]) * (cmplx)1i;
     for (int i = m; n > i; i++) CH[i] = cmplx(A[i]);
@@ -104,10 +110,18 @@ void convolve(const vector<T>& _A, const vector<T>& _B, vector<T>& C) {
     fft(CC);
 
     for (int i = 0; k / 2 > i; i++) {
+        if(round(2 * CC[i].real() / k) < 0) cout << "asd" << round(2 * CC[i].real() / k) << endl;
+        if(round(2 * CC[i].imag() / k) < 0)  cout << "bsd" << round(2 * CC[i].imag() / k) << endl;
         C[i * 2] = round(2 * CC[i].real() / k);
         C[i * 2 + 1] = round(2 * CC[i].imag() / k);
     }
 }
-template void convolve<unsigned long long>(const vector<unsigned long long>&,
-                                           const vector<unsigned long long>&,
-                                           vector<unsigned long long>&);
+template void convolve<FileBasedVector<ull>,FileBasedVector<cmplx>>(FileBasedVector<ull>&,
+                                           FileBasedVector<ull>&,
+                                           FileBasedVector<ull>&);
+
+template void convolve<vector<ull>,vector<cmplx>>(vector<ull>&,
+                                           vector<ull>&,
+                                           vector<ull>&);
+template void ifft<vector<cmplx>>(vector<cmplx>&);
+template void ifft<FileBasedVector<cmplx>>(FileBasedVector<cmplx>&);
