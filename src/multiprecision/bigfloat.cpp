@@ -23,7 +23,8 @@ BigFloat::BigFloat(double a) {
     int sa = (origexp % BASE_E + BASE_E) % BASE_E;
     int nexp = origexp - sa;
     exponent = nexp / BASE_E;
-    fraction = BigInt((extractBit(a, 0, 52) | (1LL << 52)) << sa);
+    ull frac = (extractBit(a, 0, 52) | (1LL << 52)) << sa;
+    fraction = std::move(BigInt(frac));
 }
 
 BigFloat getInitialR(BigFloat& b) {
@@ -45,13 +46,16 @@ BigFloat getInitialR(BigFloat& b) {
 BigFloat BigFloat::reciprocal(unsigned long long int digit) {
     cout << "reciprocal" << endl;
     shrink();
+    cout << toDouble() << endl;
     long long int ordig = fraction.size();
 
     BigFloat one(BigInt(1ULL));
+    cout << one.toDouble() << endl;
     // cout << "reci : " << init << endl;
     // BigFloat r(BigInt(1ULL), exptwo, sign);
     BigFloat r = getInitialR(*this);
-    BigFloat prod = r * (*this), delta = one - prod;
+    BigFloat prod = r * (*this);
+    BigFloat delta = one - prod;
     long long prec = -(delta.exponent + (long long)delta.fraction.MSL()) - 1;
     while (max(0ll, prec) < digit) {
         cout << "prec:" << prec << endl;
@@ -65,15 +69,22 @@ BigFloat BigFloat::reciprocal(unsigned long long int digit) {
         delta = one - prod;
         prec = -(delta.exponent + (long long)delta.fraction.MSL()) - 1;
 
-        r.changeExponent(min(-ordig - prec * 2, -prec * 2));
-        delta.changeExponent(min(-ordig - prec * 2, -prec * 2));
+        long long int nprec = min(-ordig - prec * 3, -prec * 3);
+        r.changeExponent(nprec);
+        delta.changeExponent(nprec);
     }
     cout << "prec:" << prec << endl;
     return r;
 }
 
 BigFloat BigFloat::operator*( BigFloat& b) {
-    BigFloat ret(b.fraction * this->fraction, b.exponent + this->exponent,
+    BigFloat ret(this->fraction * b.fraction, b.exponent + this->exponent,
+                 sign ^ b.sign);
+    ret.shrink();
+    return ret;
+}
+BigFloat BigFloat::operator*( BigFloat&& b) {
+    BigFloat ret(this->fraction * b.fraction , b.exponent + this->exponent,
                  sign ^ b.sign);
     ret.shrink();
     return ret;
@@ -111,7 +122,7 @@ void BigFloat::changeExponent(long long int nexponent) {
     if (diff > 0) {
         ull sz = fraction.limbs.size();
         fraction.limbs.resize(fraction.limbs.size() + diff);
-        for(int i = sz - 1; diff <= i; i--){
+        for(int i = sz - 1; 0 <= i; i--){
             fraction.limbs[i + diff] = fraction.limbs[i];
         }
         // fraction.limbs.insert(fraction.limbs.begin(), diff, 0);

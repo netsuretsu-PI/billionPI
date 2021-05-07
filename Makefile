@@ -30,11 +30,11 @@ $(OBJDIR)/main.o: $(SRCDIR)/main.cpp
 $(OBJDIR)/test.o: $(SRCDIR)/test.cpp
 	$(CXX) $(SRCDIR)/test.cpp -c $(CFLAGS) -o $(OBJDIR)/test.o
 
-pi: $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o
-	$(CXX) $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o -o pi $(CFLAGS) -pthread
+pi: $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o
+	$(CXX) $(OBJDIR)/main.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o -o pi $(CFLAGS) -pthread
 
 test: $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o
 	$(CXX) $(OBJDIR)/test.o $(OBJDIR)/bigint.o $(OBJDIR)/bigfloat.o $(OBJDIR)/multiprec.o $(OBJDIR)/fileBasedVector.o $(OBJDIR)/wrappedVector.o -o test $(CFLAGS) -pthread
 
 clean:
-	rm -f obj/* pi test out.txt
+	rm -f obj/* pi test out.txt vecData/*

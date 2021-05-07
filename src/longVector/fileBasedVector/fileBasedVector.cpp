@@ -132,13 +132,15 @@ void FileBasedVector<T>::resize(ull _size){
 }
 
 template <class T>
-void FileBasedVector<T>::freeResources(){
+void FileBasedVector<T>::freeResources() noexcept {
     auto cp = cachedPages;
     for(auto page : cp) 
         removeCache(page.second);
     
-    close(fd);
-    unlink(fileName.c_str());
+    if(fd != -1)
+        close(fd);
+    if(fileName != "")
+        unlink(fileName.c_str());
 }
 
 template <class T>
@@ -147,12 +149,21 @@ FileBasedVector<T>::~FileBasedVector(){
 }
 
 template <class T>
-FileBasedVector<T>::FileBasedVector(FileBasedVector<T>&& src){
-    fileName = std::move(src.fileName);
-    fd = std::move(src.fd);
-    reservedPage = std::move(src.reservedPage);
-    cachedPages = std::move(src.cachedPages);
-    lastUsedPagePQ = std::move(src.lastUsedPagePQ);
+FileBasedVector<T>::FileBasedVector(FileBasedVector<T>&& r) noexcept {
+    if (this == &r) return;
+    freeResources();
+
+    this->_size = r._size;
+    fileName = r.fileName;
+    fd = r.fd;
+    reservedPage = r.reservedPage;
+    cachedPages = r.cachedPages;
+    lastUsedPagePQ = r.lastUsedPagePQ;
+
+    r.fd = -1;
+    r.cachedPages.clear();
+    r.lastUsedPagePQ.clear();
+    r.fileName = "";
 }
 
 template <class T>
@@ -165,13 +176,20 @@ void FileBasedVector<T>::operator=(FileBasedVector<T>& src){
 }
 
 template <class T>
-FileBasedVector<T>& FileBasedVector<T>::operator=(FileBasedVector<T>&& r){
+FileBasedVector<T>& FileBasedVector<T>::operator=(FileBasedVector<T>&& r) noexcept {
+    if (this == &r) return *this;
     freeResources();
 
+    this->_size = r._size;
     fileName = r.fileName;
     fd = r.fd;
     reservedPage = r.reservedPage;
     cachedPages = r.cachedPages;
     lastUsedPagePQ = r.lastUsedPagePQ;
+
+    r.fd = -1;
+    r.cachedPages.clear();
+    r.lastUsedPagePQ.clear();
+    r.fileName = "";
     return *this;
 }

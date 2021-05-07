@@ -52,6 +52,20 @@ BigInt BigInt::operator*(BigInt& b) {
     BigInt c(size_t(1 << (getFSize(n) + 1)));
     convolve(limbs, b.limbs, c.limbs);
     c.normalize();
+// #ifdef DEBUG
+    if (c.toCppInt() != b.toCppInt() * toCppInt()) {
+        cout << c.size() << " " << limbs.size() << " " << b.limbs.size()
+             << endl;
+    }
+// #endif
+    return c;
+}
+
+BigInt BigInt::operator*(BigInt&& b) {
+    size_t n = max(limbs.size(), b.limbs.size());
+    BigInt c(size_t(1 << (getFSize(n) + 1)));
+    convolve(limbs, b.limbs, c.limbs);
+    c.normalize();
 #ifdef DEBUG
     if (c.toCppInt() != b.toCppInt() * toCppInt()) {
         cout << c.size() << " " << limbs.size() << " " << b.limbs.size()
@@ -170,6 +184,12 @@ void BigInt::operator-=( BigInt& b) {
 }
 
 BigInt BigInt::operator+( BigInt& b)  {
+    BigInt ret((size_t)0);
+    ret.limbs = limbs;
+    ret += b;
+    return ret;
+}
+BigInt BigInt::operator+( BigInt&& b)  {
     BigInt ret((size_t)0);
     ret.limbs = limbs;
     ret += b;

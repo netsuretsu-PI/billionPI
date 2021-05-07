@@ -1,6 +1,8 @@
 #include "multiprec.hpp"
 
 #include <algorithm>
+#include <iostream>
+#include <assert.h>
 
 using namespace std::literals::complex_literals;
 const cmplx PI2 = 6.28318530717958647692;
@@ -79,7 +81,10 @@ void ifft(VEC& ar) {
 
 template<class VEC, class CMPLXVEC>
 void convolve(VEC& A, VEC& B, VEC& C) {
-    if (A.size() < B.size()) swap(A, B);
+    if (A.size() < B.size()) {
+        convolve(B,A,C);
+        return;
+    }
 
     int n = max(A.size(), B.size()), m = min(A.size(), B.size());
     int l = getFSize(n) + 1, k = 1 << l;
@@ -105,6 +110,8 @@ void convolve(VEC& A, VEC& B, VEC& C) {
     fft(CC);
 
     for (int i = 0; k / 2 > i; i++) {
+        if(round(2 * CC[i].real() / k) < 0) cout << "asd" << round(2 * CC[i].real() / k) << endl;
+        if(round(2 * CC[i].imag() / k) < 0)  cout << "bsd" << round(2 * CC[i].imag() / k) << endl;
         C[i * 2] = round(2 * CC[i].real() / k);
         C[i * 2 + 1] = round(2 * CC[i].imag() / k);
     }

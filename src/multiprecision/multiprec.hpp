@@ -2,9 +2,9 @@
 #include <complex>
 #include "../longVector/fileBasedVector/fileBasedVector.hpp"
 using std::vector;
-using cmplx = std::complex<double>;
+using cmplx = std::complex<long double>;
 
-const int BASE_E = 14;
+const int BASE_E = 10;
 const int BASE_SQRT = 1 << (BASE_E / 2);
 const int BASE = 1 << BASE_E;
 const int BASE_MASK = BASE - 1;

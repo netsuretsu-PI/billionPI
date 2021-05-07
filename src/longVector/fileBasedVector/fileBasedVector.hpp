@@ -69,8 +69,8 @@ public:
     void resize(ull _size);
     ~FileBasedVector(); //release resources (delete files)
 
-    FileBasedVector(FileBasedVector<T>&& src);
-    FileBasedVector& operator=(FileBasedVector&& r);
+    FileBasedVector(FileBasedVector<T>&& src) noexcept;
+    FileBasedVector& operator=(FileBasedVector&& r) noexcept;
 
     void operator=(FileBasedVector<T>& src);
 private:
@@ -80,7 +80,7 @@ private:
     void reserveInPage(ull num);
     void* getPageAddress(ull pageIdx);
     void touchPage(PageInfoPtr page);
-    void freeResources();
+    void freeResources() noexcept;
 
     ull getSizeInByte();
     ull getSizeInPage();
@@ -96,3 +96,4 @@ template class FileBasedVector<long long int>;
 template class FileBasedVector<unsigned long long int>;
 template class FileBasedVector<double>;
 template class FileBasedVector<std::complex<double>>;
+template class FileBasedVector<std::complex<long double>>;

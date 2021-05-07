@@ -3,6 +3,7 @@
 #include <iostream>
 #include "./multiprecision/multiprec.hpp"
 #include "./multiprecision/bigint.hpp"
+#include "./multiprecision/bigfloat.hpp"
 using std::cout;
 using std::endl;
 
@@ -32,10 +33,28 @@ void bigIntTest() {
     cout << (a * b).toCppInt() << endl;
     cout << (a * b * a * b * a * b * a * b * a * b * a * b * a).toCppInt() << endl;
 }
+
+void bigFloatTest() {
+    BigFloat a(0.242), b(0.3331), c(7.0);
+
+    cout << c.toDouble() << endl;
+    a.print();
+    cout << a.toDouble() << endl;
+    cout << (a + b).toDouble() << endl;
+    cout << (a * b).toDouble() << endl;
+    cout << c.toDouble() << endl;
+    cout << (a * a * c * b).toDouble() << endl;
+    cout << c.toDouble() << endl;
+    cout << c.reciprocal(100).toDouble() << endl;
+    cout << invsqrt(c, 100).toDouble() << endl;
+    // cout << (a * b).toDouble() << endl;
+    // cout << (a * b * a * b * a * b * a * b * a * b * a * b * a).toDouble() << endl;
+}
 void fileBasedVectorTest(){
     // simpleWriteTest();
-    fftTest();
-    bigIntTest();
+    // fftTest();
+    // bigIntTest();
+    bigFloatTest();
 }
 
 int main(){
