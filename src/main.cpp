@@ -122,6 +122,7 @@ int main(int argc, char* argv[]) {
     // ans.print();
     // cout << ans.toDouble() << endl;
     // ans.print();
-    dumpBigFloat(ans, cout, N);
+    int nextDumpId = 0;
+    dumpBigFloat(ans, cout, N, 0, 0, nextDumpId);
     return 0;
 }

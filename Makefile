@@ -5,7 +5,7 @@ MULTIPRECDIR = ${SRCDIR}/multiprecision
 LONGVECTORDIR = ${SRCDIR}/longVector
 OBJDIR = ./obj
 
-CFLAGS = -O0 -g -std=c++17 -D _GLIBCXX_DEBUG -D _GLIBCXX_DEBUG_PEDANTIC -D_DEBUG
+CFLAGS = -O3 -g -std=c++17 -D _GLIBCXX_DEBUG -D _GLIBCXX_DEBUG_PEDANTIC -D_DEBUG
 
 ifeq ($(BUILD),release)
 	CFLAGS = -O3 -std=c++17

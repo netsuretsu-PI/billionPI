@@ -25,6 +25,9 @@ public:
     BigFloat reciprocal(unsigned long long int digit);
     void shrink();
 };
-void dumpBigFloat(BigFloat x, std::ostream& ost, unsigned long long int prec);
+void dumpBigFloat(BigFloat x, std::ostream& ost, unsigned long long int prec,
+                  int depth, int id, int& nextDumpId);
+// void dumpBigFloat(BigFloat x, ostream& ost, unsigned long long int prec,
+//                   int depth, int id);
 BigFloat invsqrt(BigFloat& b, unsigned long long digit);
 double testDiv(BigFloat& a, BigFloat& b);

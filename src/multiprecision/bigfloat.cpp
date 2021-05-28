@@ -1,7 +1,10 @@
 #include "bigfloat.hpp"
 
 #include <algorithm>
+#include <atomic>
+#include <condition_variable>
 #include <iostream>
+#include <thread>
 
 #include "bigint.hpp"
 using namespace std;
@@ -130,7 +133,7 @@ void BigFloat::print() {
     cout << "sign : " << sign << endl;
     cout << "exponen : " << exponent << endl;
     cout << "topexponen : " << exponent + fraction.limbs.size() + 1 << endl;
-    // fraction.print();
+    fraction.print();
 }
 
 unsigned long long int floor(BigFloat& x) {
@@ -142,7 +145,23 @@ unsigned long long int floor(BigFloat& x) {
     }
 }
 
-void dumpBigFloat(BigFloat x, ostream& ost, unsigned long long int prec) {
+BigFloat pow10(int exp) {
+    if (exp == 0) {
+        return BigFloat(1.0);
+    }
+    auto prev = pow10(exp / 2);
+    BigFloat ret(0.0);
+    if (exp % 2 == 0) {
+        ret = prev * prev;
+    } else {
+        ret = (prev * prev * BigFloat(10.0));
+    }
+    ret.shrink();
+    return ret;
+}
+
+void dumpBigFloatPrimitive(BigFloat& x, ostream& ost,
+                           unsigned long long int prec) {
     BigFloat ten(10.0);
     ost << floor(x) << ".";
     if (floor(x) != 0) {
@@ -156,6 +175,69 @@ void dumpBigFloat(BigFloat x, ostream& ost, unsigned long long int prec) {
         }
     }
     ost << endl;
+}
+std::mutex mtx;
+std::condition_variable cv;
+void dumpBigFloat(BigFloat x, ostream& ost, unsigned long long int prec,
+                  int depth, int id, int& nextDumpId) {
+    if (depth == 0) {
+        ost << floor(x) << ".";
+        if (floor(x) != 0) {
+            x.fraction.limbs.pop_back();
+        }
+    }
+    if (depth == 5) {
+        BigFloat ten(10.0);
+        string str = "";
+        for (unsigned long long int i = 0; str.size() < prec; i++) {
+            x = x * ten;
+            str += to_string(floor(x));
+            if (floor(x) != 0) {
+                x.fraction.limbs.pop_back();
+            }
+        }
+        while (str.size() != prec) {
+            str.pop_back();
+        }
+        {
+            std::unique_lock<std::mutex> uniq_lk(mtx);
+            cv.wait(uniq_lk, [&] { return id == nextDumpId; });
+
+            ost << str;
+            if ((id == (1 << depth) - 1)) {
+                ost << endl;
+            }
+            nextDumpId++;
+        }
+        cv.notify_all();
+
+    } else {
+        int firstPrec = prec / 2;
+        int secondPrec = prec - firstPrec;
+
+        auto second = x;
+        int diff = (prec - firstPrec) / BASE_10;
+        x.fraction.limbs = vector<LIMB>(x.fraction.limbs.begin() + diff,
+                                        x.fraction.limbs.end());
+        x.exponent += diff;
+        x.shrink();
+
+        auto padding = pow10(firstPrec);
+        second = second * padding;
+        assert(second.exponent < 0);
+        while (second.fraction.limbs.size() != -second.exponent) {
+            second.fraction.limbs.pop_back();
+        }
+        second.shrink();
+
+        thread th1(dumpBigFloat, x, std::ref(ost), firstPrec, depth + 1, id * 2,
+                   std::ref(nextDumpId));
+        thread th2(dumpBigFloat, second, std::ref(ost), secondPrec, depth + 1,
+                   id * 2 + 1, std::ref(nextDumpId));
+
+        th1.join();
+        th2.join();
+    }
 }
 
 double BigFloat::toDouble() {
